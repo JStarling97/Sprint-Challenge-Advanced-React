@@ -1,29 +1,43 @@
-import React, { useState } from 'react';
-import { useLocalStorage } from './Hooks/LocalStorage'
-import Players from './Components/Players';
-import data from './Components/Data';
-import api from './Components/Api';
+import React from 'react';
+import "./styles.scss";
+import axios from 'axios';
+import { PlayerCard } from './components/PlayerCard';
+import { NavigationBar } from './components/NavigationBar';
 
-import './App.css';
+class App extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      players: [],
+    }
+  }
 
-function App(props) {
-  const [player, setPlayer] = useLocalStorage('player', 'country');
-  const [search, setSearch] = useLocalStorage('search', 1);
-  const [players] = useState([]);
+  componentDidMount() {
+    axios.get('http://localhost:5000/api/players')
+      .then(response => {
+        console.log("data", response)
+        this.setState({
+          players: response.data
+        })
 
-  return (
-    <>
-      <h1>Women's World Cup - 2019 </h1>
-      <select value={player} onChange={e => setPlayer(e.target.value)}>
-      </select>
-      <input
-        type='number' placeholder='Search Count' value={search} onChange={e => setSearch(e.target.value)} />
-      <div>
-        {players.map((player, index) => (
-          <Players player={player} key={index} />
+      })
+      .catch(error => {
+        console.log("Data not received", error)
+      })
+  }
+  render() {
+    return (
+      <div >
+        <NavigationBar />
+        {this.state.players.map(player => (
+          <PlayerCard key={player.id} name={player.name}
+            country={player.country}
+          />
         ))}
+
       </div>
-    </>
-  );
+    );
+  }
 }
+
 export default App;
